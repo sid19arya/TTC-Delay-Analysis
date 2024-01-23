@@ -4,6 +4,10 @@
 
 This repo contains a detailed collection of information for analyzing the TTC-Delays. outputs/paper/paper.pdf contains the final report detailing the analysis.
 
+## LLM Usage
+
+No LLMs were used in the creation of this paper or any supplementary files
+
 ## File Structure
 
 The repo is structured as:
