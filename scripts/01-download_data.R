@@ -11,16 +11,32 @@
 #### Workspace setup ####
 library(opendatatoronto)
 library(tidyverse)
-# [...UPDATE THIS...]
+
 
 #### Download data ####
-# [...ADD CODE HERE TO DOWNLOAD...]
+
+raw_data_2021 <- show_package("https://open.toronto.ca/dataset/ttc-streetcar-delay-data/") %>%
+  list_package_resources() %>%
+  filter(name == "ttc-streetcar-delay-data-2021") %>%
+  get_resource()
+raw_data_2021 <- do.call(rbind, raw_data_2021)
+# it in necessary to add this line here, since just downloading the packages gets an array of 12 tibbles which need to be binded together before beign turned into a csv! 
+
+raw_data_2022 <- show_package("https://open.toronto.ca/dataset/ttc-streetcar-delay-data/") %>%
+  list_package_resources() %>%
+  filter(name == "ttc-streetcar-delay-data-2022") %>%
+  get_resource()
+
+raw_data_2023 <- show_package("https://open.toronto.ca/dataset/ttc-streetcar-delay-data/") %>%
+  list_package_resources() %>%
+  filter(name == "ttc-streetcar-delay-data-2023") %>%
+  get_resource()
 
 
 
 #### Save data ####
-# [...UPDATE THIS...]
-# change the_raw_data to whatever name you assigned when you downloaded it.
-write_csv(the_raw_data, "inputs/data/raw_data.csv") 
 
+write_csv(raw_data_2021, "inputs/data/raw_data_2021.csv") 
+write_csv(raw_data_2022, "inputs/data/raw_data_2022.csv") 
+write_csv(raw_data_2023, "inputs/data/raw_data_2023.csv") 
          
