@@ -28,10 +28,13 @@ clean_2022 <- raw_data_2022 %>% drop_na() %>%
 clean_2023 <- raw_data_2023 %>% drop_na() %>% 
   mutate(Date = format(Date,"%m/23")) %>% 
   group_by(Date) %>%
-  summarize(incidents = n(), total_delay = sum(`Min Delay`))
+  summarize(incidents = n(), total_delay = sum(`Min Delay`)) 
 
 
 final_data <- rbind(clean_2021, clean_2022, clean_2023)
+
+final_data <- final_data %>%
+  mutate(months_elapsed = 1:nrow(final_data))
 
 #### Save data ####
 write_csv(final_data, "outputs/data/analysis_data.csv")

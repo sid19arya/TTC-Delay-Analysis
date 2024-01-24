@@ -56,9 +56,24 @@ The data in its raw form includes all these values (table 1)
 ```{r}
 #| echo: false
 table_raw <- kable(head(raw_data_ex)) %>% 
-  kable_styling(full_width = FALSE)
+  kable_styling(full_width = FALSE) %>% 
+  kable_styling(
+      latex_options = c("hold_position"),
+      full_width = FALSE
+    ) %>%
+    column_spec(column = 1:ncol(raw_data_ex), width = "2cm")
 
-table_raw
+table_raw2 <- kable(head(raw_data_ex),
+  escape = FALSE) %>%
+  kable_styling(
+    full_width = FALSE,  # Set to FALSE to limit width
+    bootstrap_options = "striped",  # Add striped rows for better readability
+    latex_options = c("hold_position")  # Use LaTeX options
+  ) %>%
+  row_spec(0, bold = TRUE)  # Bold the header row
+
+
+table_raw2
 ```
 
 We clean the data, and join the data sets for all 3 years to get a table that looks like this (table 2)
@@ -81,14 +96,39 @@ From this we can create visualizations that are able to clearly indicate the cha
 
 
 ggplot(analysis_data, aes(Date, incidents)) +
-  geom_col()
+  geom_col()+
+  coord_flip()
 ```
 
 ```{r fig.width=8}
 #| echo: false
 
 ggplot(analysis_data, aes(Date, total_delay)) +
-  geom_col()
+  geom_col() +
+  coord_flip() + 
+  scale_x_discrete(limits = rev(levels(analysis_data$Date)))
+```
+
+```{r}
+ggplot(analysis_data, aes(x = months_elapsed, y = incidents)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE, color = "blue") # Add a line of best fit
+```
+
+
+
+```{r}
+ggplot(analysis_data, aes(x = months_elapsed, y = total_delay)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE, color = "blue") # Add a line of best fit
+
+```
+```{r}
+incidents_correlation <- cor(analysis_data$months_elapsed, analysis_data$incidents)
+delay_correlation <- cor(analysis_data$months_elapsed, analysis_data$total_delay)
+print(paste("Incidents_Correlation (R value):", incidents_correlation))
+print(paste("Delay_Correlation (R value):", delay_correlation))
+
 ```
 
 
