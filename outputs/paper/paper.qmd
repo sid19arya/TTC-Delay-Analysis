@@ -8,6 +8,7 @@ date: today
 date-format: long
 abstract: "The Toronto Transit Commission (TTC) has been a core part of all residents of the city for decades - keeping each part of the city connected. That being said, the TTC is under constant scrutiny and criticism, especially in recent years regarding delays worsening - inconveniencing people's commutes. This paper examines the TTC Delays, using data from OpenDataToronto, and disproves the notion that delays have been getting increasingly worse over the past few years."
 format: pdf
+toc: true
 number-sections: true
 bibliography: references.bib
 ---
@@ -35,8 +36,6 @@ raw_data_ex <- read_csv(here("inputs/data/raw_data_2021.csv"))
 
 
 
-
-
 # Introduction
 
 As the COVID-19 pandemic died down, riders returned to the TTC, making the public transit around the city active once more. However, with their return came rampant criticism about the delays regarding the TTC. Pseudo-studies claim confidently that the TTC is deteriorating as time passes (sources) and adding to the commutes of residents of the city. 
@@ -48,13 +47,20 @@ This paper is organized in the following sections: Data, Results, Conclusion…
 
 # Data {#sec-data}
 
-The data utilized in this paper is from OpenDataToronto Library, the Datasets used are entitled: “TTC-Streetcar-Delays”. The data was collected, sorted and analyzed through the help of … (Cite all the packages).[@citeR] 
+The data utilized in this paper is from OpenDataToronto Library, the Data sets used are entitled: “TTC-Streetcar-Delays”. This dataset was last updated January 18, 2024 - and contains a detailed report of each streetcar delay from 2013 through to 2023. For the purposes of this paper, we will only examine data from 2021 on wards - as we are focused on post-pandemic trends in streetcar delays. The data was collected, sorted and analyzed through the help of … (Cite all the packages).[@citeR] 
 
+## Features of the Data
 
-The data in its raw form includes all these values (table 1)
+From the source, three individual datasets were gathered, for the delays from the years 2021, 2022, and 2023. Each of these datasets have the same 10 variable columns, and the number of observations they include range from 14400 to 17700. Each observation contains information about the the time, location, reason, and cause of each and every streetcar delay. 
+
+The data in its raw form includes all these values (@tabl-raw)
 
 ```{r}
 #| echo: false
+#| label: tabl-raw
+#| message: false
+#| warning: false
+#| tbl-cap: "Sample of uncleaned TTC Delay Data"
 table_raw <- kable(head(raw_data_ex)) %>% 
   kable_styling(full_width = FALSE) %>% 
   kable_styling(
@@ -76,41 +82,83 @@ table_raw2 <- kable(head(raw_data_ex),
 table_raw2
 ```
 
-We clean the data, and join the data sets for all 3 years to get a table that looks like this (table 2)
-Important part to note is we grouped over all the incidents for a particular month and aggregated to get the incidents and total_delay values. 
+## Cleaning the Data
+
+For cleaning the data, we apply simple steps to organize and summarise information from the three similar datasets, and aggregate their information. First, we drop rows that lacked any information (some columns indicated 'N/A' perhaps due to human error in logging the incident). Next we changed the Date/time of the incidents into a format more appropriate for our use-case ('mm/yyyy'). Finally, we aggregate over each of the incidents, and grouping by month, we create a count for the number of incidents in that month, as well as the total number of minutes delayed (summing the min_delay column from the inital dataset). We then concatonate the three datasets together. Additionally, after concatonating we also added a months elasped (from Jan 2021) column, this is because a numberical representation of passing time helps in visualizing the data, and calculating the correlation between factors. 
+
+A sample of the clean data is shown in table (@tabl-clean).
 
 
 ```{r}
+#| label: tabl-clean
 #| echo: false
+#| message: false
+#| warning: false
+#| tbl-cap: "Sample of Cleaned TTC Delay Data"
 table <- kable(head(analysis_data)) %>% 
   kable_styling(full_width = FALSE)
 
 table 
 ```
 
-From this we can create visualizations that are able to clearly indicate the change in number of incidents and total delay time over the months of 2021, 2022, 20223, as seen in graph 1 and 2 respectively. 
+## Visualizing the data
 
 
-```{r fig.height=4}
+From the clean data, we contain simple visual representations of the number of incidents, and total delay across months in figures 1(@incidents-hist) and 2(@delay-hist) respectively.
+
+
+
+```{r fig.height=3}
+#| label: incidents-hist
+#| fig-cap: "Number of Delay Incidents accross months"
+#| fig-align: 'center'
 #| echo: false
+#| warning: false
 
+# Note for clarify: The scale_x_discrete code just makes it so the labels for only some of the bars are included, so that the label does not look too clutered!
 
 ggplot(analysis_data, aes(Date, incidents)) +
   geom_col()+
+  scale_x_discrete(labels = c("","","","","05/21","","","","","10/21","","",
+          "","","","","05/22","","","","","10/22","","",
+          "","","","","05/23","","","","","10/23","","")) + 
   coord_flip()
+
 ```
 
-```{r fig.height=4}
+```{r fig.height=3}
+#| label: delay-hist
+#| fig-cap: "Total Delay (in minutes) accross months"
+#| fig-align: 'center'
 #| echo: false
+#| warning: false
+
+# Note for clarify: The scale_x_discrete code just makes it so the labels for only some of the bars are included, so that the label does not look too clutered!
 
 ggplot(analysis_data, aes(Date, total_delay)) +
   geom_col() +
   coord_flip() + 
-  scale_x_discrete(limits = rev(levels(analysis_data$Date)))
+  scale_x_discrete(limits = rev(levels(analysis_data$Date)), labels = c("","","","","05/21","","","","","10/21","","",
+          "","","","","05/22","","","","","10/22","","",
+          "","","","","05/23","","","","","10/23","",""))
+
 ```
 
+
+# Results
+
+Upon an initial rough visual inspection of the histograms, granting some amount of variance, neither the number of incidents nor the total delay seem to show notable growth. However, further investigation indicates differently. Figures 3(@inc_plot) and 4(@delay_plot) show the same data displayed as scatter plots, with a line of best fit to indicate any correlation. Although the number incidents are. This claim is given further validity when examine the correlation coefficient (R) values calculated for the two pairs of variables. The R values were -0.0016 and 0.3881 for the correlation of months elapsed with incident count and total delay respectively. The correlation coefficient of -0.0016 is negligible and therefore cannot be used to draw any indication that the number of streetcar delays incidents has increased the past 3 years. On the other hand, a correlation coefficient of 0.3881 between the total delay in minutes and months elapsed does seem to indicate a small but notably postie correlation between the two variables. Thus we see some support to the claim that the amount of delay faced by TTC riders has shown steady increase in the past 3 years.
+
+
+
+
 ```{r}
+#| label: inc_plot
+#| fig-cap: "Incidents across months (elasped from Jan/2021), with line of best fit"
+#| fig-align: 'center'
 #| echo: false
+#| warning: false
+
 ggplot(analysis_data, aes(x = months_elapsed, y = incidents)) +
   geom_point() +
   geom_smooth(method = "lm", se = FALSE, color = "blue") # Add a line of best fit
@@ -119,7 +167,11 @@ ggplot(analysis_data, aes(x = months_elapsed, y = incidents)) +
 
 
 ```{r}
+#| label: delay_plot
+#| fig-cap: "Total_delay (in minutes) across months (elasped from Jan/2021), with line of best fit"
+#| fig-align: 'center'
 #| echo: false
+#| warning: false
 ggplot(analysis_data, aes(x = months_elapsed, y = total_delay)) +
   geom_point() +
   geom_smooth(method = "lm", se = FALSE, color = "blue") # Add a line of best fit
@@ -127,6 +179,8 @@ ggplot(analysis_data, aes(x = months_elapsed, y = total_delay)) +
 ```
 ```{r}
 #| echo: false
+
+# Although the raw input of this code is not included, this was the code used to calcualte the R values for the two pairs of variables. 
 incidents_correlation <- cor(analysis_data$months_elapsed, analysis_data$incidents)
 delay_correlation <- cor(analysis_data$months_elapsed, analysis_data$total_delay)
 print(paste("Incidents_Correlation (R value):", incidents_correlation))
@@ -135,13 +189,11 @@ print(paste("Delay_Correlation (R value):", delay_correlation))
 ```
 
 
-# Results
-
-Clearly, there is no such trend, there is no evidence that the delays have been getting worse for the past 2 years. 
 
 
 # Discussion
 
+- mainly that correlation can be explained for many reasons. Critism show that the ttc is just bad, further investigation might observe many people have just been returning more and more, and more use of the ttc causes more delay incidents or whatnot. 
 
 # Conclusion
 
