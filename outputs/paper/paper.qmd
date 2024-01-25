@@ -55,7 +55,7 @@ The data utilized in this paper is from OpenDataToronto Library, the Data sets u
 
 ## Features of the Data
 
-From the source, three individual datasets were gathered, for the delays from the years 2021, 2022, and 2023. Each of these datasets have the same 10 variable columns, and the number of observations they include range from 14400 to 17700. Each observation contains information about the the time, location, reason, and cause of each and every streetcar delay.  
+From the source, three individual datasets were gathered, for the delays from the years 2021, 2022, and 2023. Each of these datasets have the same 10 variable columns, and the number of observations they include range from 14400 to 17700. Each observation contains information about the the time, location, reason, and cause of each and every streetcar delay. Specifically, the raw dataset included: Date, Line (the streetcars are split into lines across the city), Time, Day, Location (nearest station to delay),Incident (reason for delay),Min Delay (total amount of minutes the delay happened for), Min Gap, Bound (direction of streetcar travel),Vehicle (unique number of vehicle involved).
 
 ```{r}
 #| label: tabl-raw
