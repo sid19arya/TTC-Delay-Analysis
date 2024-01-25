@@ -6,7 +6,8 @@ author:
 thanks: "Code and data are available at: https://github.com/sid19arya/TTC-Delay-Analysis.git"
 date: today
 date-format: long
-abstract: "The Toronto Transit Commission (TTC) has been a core part of all residents of the city for decades - keeping each part of the city connected. That being said, the TTC is under constant scrutiny and criticism, especially in recent years regarding delays worsening - inconveniencing people's commutes. This paper examines the TTC Delays, using data from OpenDataToronto, and disproves the notion that delays have been getting increasingly worse over the past few years."
+abstract: "The Toronto Transit Commission (TTC) has been a core part of the commute of all residents of the city of Toronto for decades - keeping each part of the city connected. This paper looks at TTC-Streetcar-delay data in order to see detect the presence of any trend in said data. The paper founnd that there is a small positive correlation between the months elapsed since the start of 2021, and the total minutes of delayed experienced by the streetcars accross the Greater Toronto Area (GTA). Further analysis should be conducted to diagnose the reason behind this growth of delays in the streetcar network."
+
 format: pdf
 toc: true
 number-sections: true
@@ -38,29 +39,32 @@ raw_data_ex <- read_csv(here("inputs/data/raw_data_2021.csv"))
 
 # Introduction
 
-As the COVID-19 pandemic died down, riders returned to the TTC, making the public transit around the city active once more. However, with their return came rampant criticism about the delays regarding the TTC. Pseudo-studies claim confidently that the TTC is deteriorating as time passes (sources) and adding to the commutes of residents of the city. 
+As the largest and most densely populated city in Canada, Toronto has an incredibly high amount of residents who require efficient transportation throughout the city. The Toronto Transit Comission (TTC) takes the role of managing this public transportation (streetcars, subways, buses) in order to fulfill the required task of transporting residents. While it provides a great service to the city, it responsibility also puts it at risk of a high amount of criticism. 
+ 
+As the COVID-19 pandemic died down, riders returned to the TTC, making the public transit around the city active once more. However, with their return came rampant criticism about the delays regarding the TTC [@blogto]. In fact, articles claim confidently that the TTC is deteriorating as time passes and adding to the commutes of residents of the city [@blogto]. The growing frustration pushes further news articles claiming that the TTC is failing to fulfill its duty and is 'broken' [@torontolife].
 
-However, these are empty claims yet to be strongly supported or disproved. This study looks more closely at TTC data - specifically at streetcar delays, to reveal wether these claims are truly founded or not.
 
-This paper is organized in the following sections: Data, Results, Conclusion… 
+However, these are empty claims yet to be strongly supported or disproved. This study looks more closely at open data regarding the delays of public transportation - specifically at streetcar delays, in order to reveal ether these claims and criticism have validity to them.
+
+This paper is organized in the following sections: Data, Results, Discussion, Conclusion. First, the data section details the collection, cleaning and visualization of the datasets used - it describes the variables created and their use. Next, the results section takes the clean data and conducts analysis to assess the presence of a correlation between variables. Next, the discussion section addresses the implications of the found trend as well as limitations of the work of this paper, and suggests future works. Finally, the conclusion summarises the main discoveries of the paper.
 
 
 # Data {#sec-data}
 
-The data utilized in this paper is from OpenDataToronto Library, the Data sets used are entitled: “TTC-Streetcar-Delays”. This dataset was last updated January 18, 2024 - and contains a detailed report of each streetcar delay from 2013 through to 2023. For the purposes of this paper, we will only examine data from 2021 on wards - as we are focused on post-pandemic trends in streetcar delays. The data was collected, sorted and analyzed through the help of … (Cite all the packages).[@citeR] 
+The data utilized in this paper is from OpenDataToronto Library, the Data sets used are entitled: “TTC-Streetcar-Delays”. This dataset was last updated January 18, 2024 - and contains a detailed report of each streetcar delay from 2013 through to 2023. For the purposes of this paper, we will only examine data from 2021 on wards - as we are focused on post-pandemic trends in streetcar delays. The data was collected, sorted,  analyzed and visualized through the help of the open source programming language R.[@citeR] Within R, the following libraryies also were used in order to aid in the process: tidyverse[@tdverse], ggplot2[@ggplot], knitr[@knitr], kableExtra[@kable], opendatatoronto[@opendatatoronto], and here[@here]
 
 ## Features of the Data
 
-From the source, three individual datasets were gathered, for the delays from the years 2021, 2022, and 2023. Each of these datasets have the same 10 variable columns, and the number of observations they include range from 14400 to 17700. Each observation contains information about the the time, location, reason, and cause of each and every streetcar delay. 
-
-The data in its raw form includes all these values (@tabl-raw)
+From the source, three individual datasets were gathered, for the delays from the years 2021, 2022, and 2023. Each of these datasets have the same 10 variable columns, and the number of observations they include range from 14400 to 17700. Each observation contains information about the the time, location, reason, and cause of each and every streetcar delay.  
 
 ```{r}
-#| echo: false
 #| label: tabl-raw
+#| tbl-cap: "Sample of uncleaned TTC Delay Data"
+#| echo: false
 #| message: false
 #| warning: false
-#| tbl-cap: "Sample of uncleaned TTC Delay Data"
+#| include: false
+
 table_raw <- kable(head(raw_data_ex)) %>% 
   kable_styling(full_width = FALSE) %>% 
   kable_styling(
@@ -84,32 +88,29 @@ table_raw2
 
 ## Cleaning the Data
 
-For cleaning the data, we apply simple steps to organize and summarise information from the three similar datasets, and aggregate their information. First, we drop rows that lacked any information (some columns indicated 'N/A' perhaps due to human error in logging the incident). Next we changed the Date/time of the incidents into a format more appropriate for our use-case ('mm/yyyy'). Finally, we aggregate over each of the incidents, and grouping by month, we create a count for the number of incidents in that month, as well as the total number of minutes delayed (summing the min_delay column from the inital dataset). We then concatonate the three datasets together. Additionally, after concatonating we also added a months elasped (from Jan 2021) column, this is because a numberical representation of passing time helps in visualizing the data, and calculating the correlation between factors. 
-
-A sample of the clean data is shown in table (@tabl-clean).
+For cleaning the data, we apply simple steps to organize and summarize information from the three similar datasets, and aggregate their information. First, we drop rows that lacked any information (some columns indicated 'N/A' perhaps due to human error in logging the incident). Next we changed the Date/time of the incidents into a format more appropriate for our use-case (in 'mm/yyyy' format). Finally, we aggregate over each of the incidents, and grouping by month, we create a count for the number of incidents in that month, as well as the total number of minutes delayed (summing the min_delay column from the initial data set). We then concatenate the three datasets together. Additionally, after concatenating we also added a months elapsed (from Jan 2021) column, this is because a numerical representation of passing time helps in visualizing the data, and calculating the correlation between factors. 
 
 
 ```{r}
-#| label: tabl-clean
+#| label: tbl-clean
 #| echo: false
 #| message: false
 #| warning: false
 #| tbl-cap: "Sample of Cleaned TTC Delay Data"
-table <- kable(head(analysis_data)) %>% 
+
+analysis_data %>% head() %>% kable()%>% 
   kable_styling(full_width = FALSE)
 
-table 
+
 ```
+A sample of the clean data is shown in table (@tbl-clean). 
 
 ## Visualizing the data
 
 
-From the clean data, we contain simple visual representations of the number of incidents, and total delay across months in figures 1(@incidents-hist) and 2(@delay-hist) respectively.
-
-
 
 ```{r fig.height=3}
-#| label: incidents-hist
+#| label: fig-inchist
 #| fig-cap: "Number of Delay Incidents accross months"
 #| fig-align: 'center'
 #| echo: false
@@ -117,7 +118,7 @@ From the clean data, we contain simple visual representations of the number of i
 
 # Note for clarify: The scale_x_discrete code just makes it so the labels for only some of the bars are included, so that the label does not look too clutered!
 
-ggplot(analysis_data, aes(Date, incidents)) +
+analysis_data %>% ggplot( aes(Date, incidents)) +
   geom_col()+
   scale_x_discrete(labels = c("","","","","05/21","","","","","10/21","","",
           "","","","","05/22","","","","","10/22","","",
@@ -127,7 +128,7 @@ ggplot(analysis_data, aes(Date, incidents)) +
 ```
 
 ```{r fig.height=3}
-#| label: delay-hist
+#| label: fig-delhist
 #| fig-cap: "Total Delay (in minutes) accross months"
 #| fig-align: 'center'
 #| echo: false
@@ -145,15 +146,14 @@ ggplot(analysis_data, aes(Date, total_delay)) +
 ```
 
 
+From the clean data, we contain simple visual representations of the number of incidents, and total delay across months in figures 1(@fig-inchist) and 2(@fig-delhist) respectively.
+
+
 # Results
 
-Upon an initial rough visual inspection of the histograms, granting some amount of variance, neither the number of incidents nor the total delay seem to show notable growth. However, further investigation indicates differently. Figures 3(@inc_plot) and 4(@delay_plot) show the same data displayed as scatter plots, with a line of best fit to indicate any correlation. Although the number incidents are. This claim is given further validity when examine the correlation coefficient (R) values calculated for the two pairs of variables. The R values were -0.0016 and 0.3881 for the correlation of months elapsed with incident count and total delay respectively. The correlation coefficient of -0.0016 is negligible and therefore cannot be used to draw any indication that the number of streetcar delays incidents has increased the past 3 years. On the other hand, a correlation coefficient of 0.3881 between the total delay in minutes and months elapsed does seem to indicate a small but notably postie correlation between the two variables. Thus we see some support to the claim that the amount of delay faced by TTC riders has shown steady increase in the past 3 years.
-
-
-
-
+## Presence of Correlation
 ```{r}
-#| label: inc_plot
+#| label: fig-incplot
 #| fig-cap: "Incidents across months (elasped from Jan/2021), with line of best fit"
 #| fig-align: 'center'
 #| echo: false
@@ -167,7 +167,7 @@ ggplot(analysis_data, aes(x = months_elapsed, y = incidents)) +
 
 
 ```{r}
-#| label: delay_plot
+#| label: fig-delplot
 #| fig-cap: "Total_delay (in minutes) across months (elasped from Jan/2021), with line of best fit"
 #| fig-align: 'center'
 #| echo: false
@@ -183,25 +183,37 @@ ggplot(analysis_data, aes(x = months_elapsed, y = total_delay)) +
 # Although the raw input of this code is not included, this was the code used to calcualte the R values for the two pairs of variables. 
 incidents_correlation <- cor(analysis_data$months_elapsed, analysis_data$incidents)
 delay_correlation <- cor(analysis_data$months_elapsed, analysis_data$total_delay)
-print(paste("Incidents_Correlation (R value):", incidents_correlation))
-print(paste("Delay_Correlation (R value):", delay_correlation))
+# print(paste("Incidents_Correlation (R value):", incidents_correlation))
+# print(paste("Delay_Correlation (R value):", delay_correlation))
 
 ```
 
+Upon an initial rough visual inspection of the histograms, granting some amount of variance, neither the number of incidents nor the total delay seem to show notable growth. However, further investigation indicates differently. Figures 3(@fig-incplot) and 4(@fig-delplot) show the same data displayed as scatter plots, with a line of best fit to indicate any correlation. Although the number incidents are. This claim is given further validity when examine the correlation coefficient (R) values calculated for the two pairs of variables. The R values were -0.0016 and 0.3881 for the correlation of months elapsed with incident count and total delay respectively. The correlation coefficient of -0.0016 is negligible and therefore cannot be used to draw any indication that the number of streetcar delays incidents has increased the past 3 years. On the other hand, a correlation coefficient of 0.3881 between the total delay in minutes and months elapsed does seem to indicate a small but notably postie correlation between the two variables. Thus we see some support to the claim that the amount of delay faced by TTC riders has shown steady increase in the past 3 years.
 
 
 
 # Discussion
 
-- mainly that correlation can be explained for many reasons. Critism show that the ttc is just bad, further investigation might observe many people have just been returning more and more, and more use of the ttc causes more delay incidents or whatnot. 
+The examiniation of the TTC-Streetcar-Delay Data set from 2021 to 2023 offers valuable insight into the trends of the transport systems in the city. The examination evaluated a detailed and thorough dataset and found an increase in the delay experienced by commuters over the past 3 years - specifically, a correlation coefficient of 0.3881 between the total minutes of delay per month, and months elapsed since January 2021. 
+
+
+This asserts that the criticism of the TTC which led to this investigation was grounded in some truth. That being said, the findings of this paper is not sufficient in levying criticism towards the TTC as there is no indication as to the reason of the growth in delays over time. Although a trend was found, the reason behind the trend is a topic to be taken up in order to build on the work of this paper. 
+
+Another note to consider is that while this paper shows an increase in minutes of delay over the past 3 years, it does not compare any of this to pre-pandemic data. As riders return to using TTC post-pandemic, the delays could simply be returning to their normal values, rather than indicating a deeper issue. 
+
+Finally, this analysis used specifically streetcar delay information - other public transportation in Toronto, like the subway and buses were not discussed, further research could evaluate wether this same trends holds with those modes too.
+
+
 
 # Conclusion
 
-This paper investigated TTC delays spanning the years 2021, 2022, 2023 to see if a trend over time could be spotted. The paper concluded that there was no noticeable 
+This paper investigated TTC delays spanning the years 2021, 2022, 2023 to see if a trend over time could be spotted. The data used was thorough in detailing each delay incident throughout these three years. Although there was no noticeable trend in the number of delay incidents over time, the total minutes of delay experienced by travelers did show a steady increase with time. However, this paper is still not enough to point towards the reason for this increase in delay over time. Future work should focus on understanding this increase in delays and examine multiple other features that could cause such a delay like number of daily commuters, TTC funding, etc. 
 
 
 
 
+
+\newpage
 
 \newpage
 
