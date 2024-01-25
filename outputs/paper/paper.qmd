@@ -1,12 +1,12 @@
 ---
-title: "Have public transport delays in toronto gotten worse over time? An Analysis of the TTC Street Car Delays"
+title: "Have public transport delays in Toronto gotten worse over time? An analysis of the TTC street car delays"
 # subtitle: "My subtitle if needed"
 author: 
   - Siddharth Arya
 thanks: "Code and data are available at: https://github.com/sid19arya/TTC-Delay-Analysis.git"
 date: today
 date-format: long
-abstract: "The TTC (Toronto Transit Commission) has been a core part of all residents of the city for decades - keeping each part of the city connected. That being said, the TTC is under constant scrutiny and criticism, especially in recent years regarding delays worsening - inconveniencing people's commutes. This paper examines the TTC Delays, using data from OpenDataToronto, and disproves the notion that delays have been getting increasingly worse over the past few years."
+abstract: "The Toronto Transit Commission (TTC) has been a core part of all residents of the city for decades - keeping each part of the city connected. That being said, the TTC is under constant scrutiny and criticism, especially in recent years regarding delays worsening - inconveniencing people's commutes. This paper examines the TTC Delays, using data from OpenDataToronto, and disproves the notion that delays have been getting increasingly worse over the past few years."
 format: pdf
 number-sections: true
 bibliography: references.bib
@@ -48,7 +48,7 @@ This paper is organized in the following sections: Data, Results, Conclusion…
 
 # Data {#sec-data}
 
-The data utilized in this paper is from OpenDataToronto Library, the Datasets used are entitled: “TTC-Streetcar-Delays”. The data was collected, sorted and analyzed through the help of … (Cite all the packages).
+The data utilized in this paper is from OpenDataToronto Library, the Datasets used are entitled: “TTC-Streetcar-Delays”. The data was collected, sorted and analyzed through the help of … (Cite all the packages).[@citeR] 
 
 
 The data in its raw form includes all these values (table 1)
@@ -91,7 +91,7 @@ table
 From this we can create visualizations that are able to clearly indicate the change in number of incidents and total delay time over the months of 2021, 2022, 20223, as seen in graph 1 and 2 respectively. 
 
 
-```{r fig.width=8}
+```{r fig.height=4}
 #| echo: false
 
 
@@ -100,7 +100,7 @@ ggplot(analysis_data, aes(Date, incidents)) +
   coord_flip()
 ```
 
-```{r fig.width=8}
+```{r fig.height=4}
 #| echo: false
 
 ggplot(analysis_data, aes(Date, total_delay)) +
@@ -110,6 +110,7 @@ ggplot(analysis_data, aes(Date, total_delay)) +
 ```
 
 ```{r}
+#| echo: false
 ggplot(analysis_data, aes(x = months_elapsed, y = incidents)) +
   geom_point() +
   geom_smooth(method = "lm", se = FALSE, color = "blue") # Add a line of best fit
@@ -118,12 +119,14 @@ ggplot(analysis_data, aes(x = months_elapsed, y = incidents)) +
 
 
 ```{r}
+#| echo: false
 ggplot(analysis_data, aes(x = months_elapsed, y = total_delay)) +
   geom_point() +
   geom_smooth(method = "lm", se = FALSE, color = "blue") # Add a line of best fit
 
 ```
 ```{r}
+#| echo: false
 incidents_correlation <- cor(analysis_data$months_elapsed, analysis_data$incidents)
 delay_correlation <- cor(analysis_data$months_elapsed, analysis_data$total_delay)
 print(paste("Incidents_Correlation (R value):", incidents_correlation))
@@ -154,8 +157,5 @@ This paper investigated TTC delays spanning the years 2021, 2022, 2023 to see if
 
 
 # References
-
-::: {#refs}
-:::
 
 
